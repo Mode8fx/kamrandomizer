@@ -1,7 +1,7 @@
 # Amazing Mirror Randomizer
 This is a randomizer for Kirby & The Amazing Mirror that changes the abilities you can obtain from each enemy. You will need a US ROM of Kirby & The Amazing Mirror to use this.
 
-## Features:
+## Features
 There are plenty of user options that can adjust how abilities are distributed. These are all explained in detail in the program, but some of them include:
 - Group by original enemy grouping or original ability frequency
 - Set % chance that an enemy will have an ability
@@ -12,7 +12,7 @@ There are plenty of user options that can adjust how abilities are distributed. 
 - Seed input, so you can share your favorite seeds
 - And more!
 
-## Known bugs:
+## Known bugs
 - The following enemies cannot currently be randomized:
   - Golem
   - Parasol Waddle Dee
