@@ -1,0 +1,15 @@
+IMPORTANT ADDRESSES/VALUES:
+
+Enemy ability adresses, ability values, other assorted addresses, and a searchable area of the ROM that contains enemy data can be found at the following Google Sheet:
+https://docs.google.com/spreadsheets/d/1h7sBy7uLChk8k_WqlUQqKBzgmuiIzT5hbgjtfvkmhug/edit?usp=sharing
+
+
+
+HOW TO FIND AN ABILITY ADDRESS (or at least how I did it):
+
+First, open the game in a program that allows you to set breakpoints (we'll use mGBA's debugger).
+Next, set a breakpoint on the following address: 0x8009F0FC
+In mGBA, that means type this into your debugger: break/t 0x8009F0FC
+... the game will pause when you walk close to an enemy, or when an enemy/object spawns (in mGBA, type "continue" to resume the game). Register 0 (R0) contains the ROM address of whatever just spawned. Add 6 to this value and you get the ability address for this enemy/object.
+
+Another method is by opening the data table in the URL above and searching for the appropriate ability value. You will get a handful of addresses, usually around 3 (in this case, abilities are always stored at addresses ending in a 6 or an E); the enemy/object ability you are looking for is almost always one of these addresses.
