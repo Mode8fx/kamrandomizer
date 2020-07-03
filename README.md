@@ -13,13 +13,8 @@ There are plenty of user options that can adjust how abilities are distributed. 
 - And more!
 
 ## Known bugs
-- The following enemies cannot currently be randomized:
-  - Golem
-  - Parasol Waddle Dee
-  - Shadow Kirby
-- The following objects cannot currently be randomized:
-  - Boxy's Bomb
-  - Master/Crazy Hand's Star
+- The following enemies cannot currently be randomized: Golem, Parasol Waddle Dee, Shadow Kirby
+- The following objects cannot currently be randomized: Boxy's Bomb, Master/Crazy Hand's Star
 - For some reason, the first Waddle Doo in Rainbow Route cannot be randomized, though the rest can. There may be other enemies with this issue, but this is the only one I've found.
 
 ## Documentation
