@@ -6,6 +6,7 @@ from os import path, remove
 from time import sleep
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
+from amrgui import *
 
 """
 Ability Values:
@@ -178,7 +179,67 @@ def main():
 	global noneAbilityChanceBasicEnemy
 	global noneAbilityChanceNonBasicEnemy
 	global includeMiniBosses
-	global randomizeMinnyAndWheelie
+	global includeMinnyAndWheelie
+	global objectRandomizationType
+	global noneAbilityChanceBasicObject
+	global noneAbilityChanceNonBasicObject
+	global generateAbilityLog
+	# open the GUI
+	vp_start_gui()
+
+	sourceRom = AMR_support.sourceRom.get()
+	generateAbilityLog = int(AMR_support.generateAbilityLog.get())
+	seedNum = 1
+	if int(AMR_support.useSeed.get()) == 1:
+		currSeed = int(AMR_support.seedInput.get(), 36)
+		#TODO: verify seed (which also sets variables)
+		numSeeds = 1
+		generateSeed(currSeed)
+	else:
+		adtDict = {"Pure Random":1, "By Enemy Grouping":2, "By Ability Frequency":3}
+		abilityDistributionType = adtDict.get(AMR_support.abilityDistributionType.get())
+		bebDict = {"All Random":1, "Basic Enemies Random":2, "No Random (Unchanged)":3}
+		basicEnemyBehaviorType = bebDict.get(AMR_support.basicEnemyBehaviorType.get())
+		noneAbilityChanceEnemy = int(AMR_support.noneAbilityChanceEnemy.get())
+		includeMiniBosses = int(AMR_support.includeMiniBosses.get())
+		includeMinnyAndWheelie = int(AMR_support.includeMinnyAndWheelie.get())
+		ortDict = {"Yes":1, "Basic Objects Only":2, "No":3}
+		objectRandomizationType = ortDict.get(AMR_support.objectRandomizationType.get())
+		noneAbilityChanceObject = int(AMR_support.noneAbilityChanceObject.get())
+		numSeeds = int(AMR_support.numSeeds.get())
+		# change variables as necessary
+		if basicEnemyBehaviorType != 3:
+			noneAbilityChanceEnemy = min(ceil(noneAbilityChanceEnemy/1.67), 60) # this value rounds to increments of 1.67%; this is to reduce the length of the seed
+			noneAbilityChanceBasicEnemy = noneAbilityChanceEnemy
+			noneAbilityChanceNonBasicEnemy = noneAbilityChanceEnemy if basicEnemyBehaviorType == 1 else 30
+		else:
+			noneAbilityChanceBasicEnemy = 0
+			noneAbilityChanceNonBasicEnemy = 60
+		if objectRandomizationType != 1:
+			noneAbilityChanceObject = 30 # unused but needed for seed calculation
+			noneAbilityChanceBasicObject = 0
+			noneAbilityChanceNonBasicObject = 30
+		else:
+			noneAbilityChanceObject = min(ceil(noneAbilityChanceObject/3.34), 30) # this value rounds to increments of 3.34%; this is to reduce the length of the seed
+			noneAbilityChanceBasicObject = noneAbilityChanceObject
+			noneAbilityChanceNonBasicObject = noneAbilityChanceObject
+		settingsSeed = encodeSeed([abilityDistributionType-1, basicEnemyBehaviorType-1, noneAbilityChanceBasicEnemy, noneAbilityChanceNonBasicEnemy, includeMiniBosses-1, includeMinnyAndWheelie-1, objectRandomizationType-1, noneAbilityChanceObject], [2,2,60,60,1,1,2,30])[0]
+		for i in range(numSeeds):
+			maxVal = int("ZZZZZ", 36)
+			genSeed = random.randint(0, maxVal)
+			currSeed = (settingsSeed*(maxVal+1)) + genSeed
+			generateSeed(currSeed)
+
+def main_cmd_line():
+	global sourceRom
+	global seedNum
+	global currSeed
+	global abilityDistributionType
+	global basicEnemyBehaviorType
+	global noneAbilityChanceBasicEnemy
+	global noneAbilityChanceNonBasicEnemy
+	global includeMiniBosses
+	global includeMinnyAndWheelie
 	global objectRandomizationType
 	global noneAbilityChanceBasicObject
 	global noneAbilityChanceNonBasicObject
@@ -192,10 +253,10 @@ def main():
 	while sourceRom == "":
 		Tk().withdraw()
 		sourceRom = askopenfilename(filetypes=[("GBA ROM files", "*.gba")])
-	alreadyHaveSeed = makeChoice("Do you already have a seed?", ["Yes", "No"])
+	useSeed = makeChoice("Do you already have a seed?", ["Yes", "No"])
 	seedInput = ""
 	seedNum = 1
-	if alreadyHaveSeed == 1:
+	if useSeed == 1:
 		currSeed = verifySeed()
 		generateAbilityLog = makeChoice("Generate a spoiler text file containing ability distribution?", [
 			"Yes",
@@ -211,34 +272,30 @@ def main():
 			"By ability frequency (for example, two enemies gave Ice in the original game, so two random enemies will give Ice here)"])
 		if abilityDistributionType == 1:
 			basicEnemyBehaviorType = makeChoice("[1a/6] How should enemies that do not give an ability be handled?", [
-				"All enemies will give an ability",
 				"[R] All enemies may or may not give an ability",
 				"Basic enemies that did not originally give an ability (like Waddle Dee) may or may not give an ability; other enemies are still guaranteed to give an ability",
 				"Unchanged (basic enemies will still not give an ability, and other enemies will)"])
 		else:
-			basicEnemyBehaviorType = 4
-		if basicEnemyBehaviorType == 1:
-			noneAbilityChanceBasicEnemy = 60
-			noneAbilityChanceNonBasicEnemy = 60
-		elif basicEnemyBehaviorType in [2, 3]:
+			basicEnemyBehaviorType = 3
+		if basicEnemyBehaviorType != 3:
 			noneAbilityChanceEnemy = makeChoiceNumInput("[1b/6] For these enemies that may or may not give an ability, how likely is it that they do give an ability? (0\%-100\%) ([R] = 90)", 0, 100)
 			noneAbilityChanceEnemy = min(ceil(noneAbilityChanceEnemy/1.67), 60) # this value rounds to increments of 1.67%; this is to reduce the length of the seed
 			noneAbilityChanceBasicEnemy = noneAbilityChanceEnemy
-			noneAbilityChanceNonBasicEnemy = noneAbilityChanceEnemy if basicEnemyBehaviorType == 2 else 30
+			noneAbilityChanceNonBasicEnemy = noneAbilityChanceEnemy if basicEnemyBehaviorType == 1 else 30
 		else:
 			noneAbilityChanceBasicEnemy = 0
 			noneAbilityChanceNonBasicEnemy = 60
 		includeMiniBosses = makeChoice("[2/6] Include mini-bosses?", [
 			"[R] Yes (randomize mini-boss abilities)",
 			"No (do not change mini-bosses)"])
-		randomizeMinnyAndWheelie = makeChoice("[3/6] Include Minny and Wheelie? (Not recommended; you need Mini and Wheel at certain parts of the game)", [
+		includeMinnyAndWheelie = makeChoice("[3/6] Include Minny and Wheelie? (Not recommended; you need Mini and Wheel at certain parts of the game)", [
 			"Yes (randomize Minny and Wheelie's abilities)",
 			"[R] No (do not change their abilities)"])
 		objectRandomizationType = makeChoice("[4/6] How would you like to randomize other objects (like inhalable enemy projectiles; basically everything except star blocks)?", [
-			"Do not randomize objects",
+			"[R] Randomize all objects"
 			"Only randomize objects that already give abilities",
-			"[R] Randomize all objects"])
-		if objectRandomizationType in [1,2]:
+			"Do not randomize objects"])
+		if objectRandomizationType != 1:
 			noneAbilityChanceObject = 30 # unused but needed for seed calculation
 			noneAbilityChanceBasicObject = 0
 			noneAbilityChanceNonBasicObject = 30
@@ -252,7 +309,7 @@ def main():
 			"No"])
 		numSeeds = int(makeChoiceNumInput("[6/6] How many seeds do you want to generate with these settings? (up to 20)", 0, 100))
 
-		settingsSeed = encodeSeed([abilityDistributionType-1, basicEnemyBehaviorType-1, noneAbilityChanceBasicEnemy, noneAbilityChanceNonBasicEnemy, includeMiniBosses-1, randomizeMinnyAndWheelie-1, objectRandomizationType-1, noneAbilityChanceObject], [2,3,60,60,1,1,2,30])[0]
+		settingsSeed = encodeSeed([abilityDistributionType-1, basicEnemyBehaviorType-1, noneAbilityChanceBasicEnemy, noneAbilityChanceNonBasicEnemy, includeMiniBosses-1, includeMinnyAndWheelie-1, objectRandomizationType-1, noneAbilityChanceObject], [2,2,60,60,1,1,2,30])[0]
 		for i in range(numSeeds):
 			maxVal = int("ZZZZZ", 36)
 			genSeed = random.randint(0, maxVal)
@@ -274,7 +331,7 @@ def generateSeed(seed):
 	global noneAbilityChanceBasicEnemy
 	global noneAbilityChanceNonBasicEnemy
 	global includeMiniBosses
-	global randomizeMinnyAndWheelie
+	global includeMinnyAndWheelie
 	global objectRandomizationType
 	global noneAbilityChanceBasicObject
 	global noneAbilityChanceNonBasicObject
@@ -288,7 +345,7 @@ def generateSeed(seed):
 	if includeMiniBosses:
 		myEnemies.update(copy.deepcopy(miniBosses))
 	myEnemies = shuffleDict(myEnemies)
-	if not randomizeMinnyAndWheelie:
+	if not includeMinnyAndWheelie:
 		del myEnemies["Minny"]
 		del myEnemies["Wheelie"]
 	if abilityDistributionType != 3:
@@ -304,7 +361,7 @@ def generateSeed(seed):
 		myEnemies = randomizeGroup(myEnemies, abilityArray, abilityDistributionType != 3, True)
 
 	myObjects = shuffleDict(objects)
-	if objectRandomizationType != 1:
+	if objectRandomizationType != 3:
 		abilityArray = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19]
 		myObjects = randomizeGroup(myObjects, abilityArray, True, False)
 
@@ -496,7 +553,7 @@ def verifySeed():
 	global noneAbilityChanceBasicEnemy
 	global noneAbilityChanceNonBasicEnemy
 	global includeMiniBosses
-	global randomizeMinnyAndWheelie
+	global includeMinnyAndWheelie
 	global objectRandomizationType
 	global noneAbilityChanceBasicObject
 	global noneAbilityChanceNonBasicObject
@@ -506,18 +563,18 @@ def verifySeed():
 		seedInput = input().upper().strip()
 		try:
 			assert(len(seedInput) == 10)
-			abilityDistributionType, basicEnemyBehaviorType, noneAbilityChanceBasicEnemy, noneAbilityChanceNonBasicEnemy, includeMiniBosses, randomizeMinnyAndWheelie, objectRandomizationType, noneAbilityChanceObject = decodeSeed(seedInput[:5], [2,3,60,60,1,1,2,30], 36)
+			abilityDistributionType, basicEnemyBehaviorType, noneAbilityChanceBasicEnemy, noneAbilityChanceNonBasicEnemy, includeMiniBosses, includeMinnyAndWheelie, objectRandomizationType, noneAbilityChanceObject = decodeSeed(seedInput[:5], [2,2,60,60,1,1,2,30], 36)
 			abilityDistributionType += 1
 			basicEnemyBehaviorType += 1
 			includeMiniBosses += 1
-			randomizeMinnyAndWheelie += 1
+			includeMinnyAndWheelie += 1
 			objectRandomizationType += 1
 			assert 1 <= abilityDistributionType <= 3
-			assert 1 <= basicEnemyBehaviorType <= 4
+			assert 1 <= basicEnemyBehaviorType <= 3
 			assert 0 <= noneAbilityChanceBasicEnemy <= 60
 			assert 0 <= noneAbilityChanceNonBasicEnemy <= 60
 			assert 1 <= includeMiniBosses <= 2
-			assert 1 <= randomizeMinnyAndWheelie <= 2
+			assert 1 <= includeMinnyAndWheelie <= 2
 			assert 1 <= objectRandomizationType <= 3
 			assert 0 <= noneAbilityChanceObject <= 30
 			noneAbilityChanceBasicObject = noneAbilityChanceObject

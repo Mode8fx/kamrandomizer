@@ -1,0 +1,24 @@
+        self.RadioButton_UseSettings.configure(command=self.prepareSettingsAndSeed)
+        self.RadioButton_UseSeed.configure(command=self.prepareSettingsAndSeed)
+
+    def prepareSettingsAndSeed(self):
+        if AMR_support.useSeed.get()=="1":
+            self.Entry_SeedInput.configure(state="normal")
+            self.ComboBox_AbilityDistribution.configure(state="disabled")
+            self.ComboBox_EnemiesWithoutAbility.configure(state="disabled")
+            self.Entry_UndecidedEnemyChance.configure(state="disabled")
+            self.CheckButton_RandomizeMiniBosses.configure(state="disabled")
+            self.CheckButton_RandomizeMinnyAndWheelie.configure(state="disabled")
+            self.ComboBox_RandomizeObjects.configure(state="disabled")
+            self.Entry_UndecidedObjectChance.configure(state="disabled")
+            self.ComboBox_NumSeeds.configure(state="disabled")
+        else:
+            self.Entry_SeedInput.configure(state="disabled")
+            self.ComboBox_AbilityDistribution.configure(state="readonly")
+            self.ComboBox_EnemiesWithoutAbility.configure(state="readonly")
+            self.Entry_UndecidedEnemyChance.configure(state="normal")
+            self.CheckButton_RandomizeMiniBosses.configure(state="normal")
+            self.CheckButton_RandomizeMinnyAndWheelie.configure(state="normal")
+            self.ComboBox_RandomizeObjects.configure(state="readonly")
+            self.Entry_UndecidedObjectChance.configure(state="normal")
+            self.ComboBox_NumSeeds.configure(state="readonly")
