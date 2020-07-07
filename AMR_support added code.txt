@@ -5,7 +5,7 @@ def initVars():
     basicEnemyBehaviorType.set("All Random")
     noneAbilityChanceEnemy.set("90")
     includeMiniBosses.set("1")
-    includeMinnyAndWheelie.set("1")
+    includeMinnyAndWheelie.set("2")
     objectRandomizationType.set("Yes")
     noneAbilityChanceObject.set("90")
     numSeeds.set("1")
