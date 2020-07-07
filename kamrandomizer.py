@@ -217,48 +217,64 @@ def randomize():
 			noneAbilityChanceNonBasicObject = noneAbilityChanceObject
 		except:
 			return [False, "Invalid Seed."]
-		numSeeds = 1
+		numSeeds = 0
 		if not generateSeed(currSeed):
 			return [False, "Failed to generate the given seed."]
 		return [True, "Successfully generated the given seed."]
 	else:
 		adtDict = {"Pure Random":1, "By Enemy Grouping":2, "By Ability Frequency":3}
 		abilityDistributionType = adtDict.get(AMR_support.abilityDistributionType.get())
-		bebDict = {"All Random":1, "Basic Enemies Random":2, "No Random (Unchanged)":3}
-		basicEnemyBehaviorType = bebDict.get(AMR_support.basicEnemyBehaviorType.get())
-		noneAbilityChanceEnemy = int(AMR_support.noneAbilityChanceEnemy.get())
-		includeMiniBosses = int(AMR_support.includeMiniBosses.get())
-		includeMinnyAndWheelie = int(AMR_support.includeMinnyAndWheelie.get())
-		ortDict = {"Yes":1, "Basic Objects Only":2, "No":3}
-		objectRandomizationType = ortDict.get(AMR_support.objectRandomizationType.get())
-		noneAbilityChanceObject = int(AMR_support.noneAbilityChanceObject.get())
-		numSeeds = int(AMR_support.numSeeds.get())
-		# change variables as necessary
+		if abilityDistributionType == 1:
+			bebDict = {"All Random":1, "Basic Enemies Random":2, "No Random (Unchanged)":3}
+			basicEnemyBehaviorType = bebDict.get(AMR_support.basicEnemyBehaviorType.get())
+		else:
+			basicEnemyBehaviorType = 3
 		if basicEnemyBehaviorType != 3:
+			noneAbilityChanceEnemy = int(AMR_support.noneAbilityChanceEnemy.get())
 			noneAbilityChanceEnemy = min(ceil(noneAbilityChanceEnemy/1.67), 60) # this value rounds to increments of 1.67%; this is to reduce the length of the seed
 			noneAbilityChanceBasicEnemy = noneAbilityChanceEnemy
 			noneAbilityChanceNonBasicEnemy = noneAbilityChanceEnemy if basicEnemyBehaviorType == 1 else 30
 		else:
 			noneAbilityChanceBasicEnemy = 0
 			noneAbilityChanceNonBasicEnemy = 60
+		includeMiniBosses = int(AMR_support.includeMiniBosses.get())
+		includeMinnyAndWheelie = int(AMR_support.includeMinnyAndWheelie.get())
+		ortDict = {"Yes":1, "Basic Objects Only":2, "No":3}
+		objectRandomizationType = ortDict.get(AMR_support.objectRandomizationType.get())
 		if objectRandomizationType != 1:
 			noneAbilityChanceObject = 30 # unused but needed for seed calculation
 			noneAbilityChanceBasicObject = 0
 			noneAbilityChanceNonBasicObject = 30
 		else:
+			noneAbilityChanceObject = int(AMR_support.noneAbilityChanceObject.get())
 			noneAbilityChanceObject = min(ceil(noneAbilityChanceObject/3.34), 30) # this value rounds to increments of 3.34%; this is to reduce the length of the seed
 			noneAbilityChanceBasicObject = noneAbilityChanceObject
 			noneAbilityChanceNonBasicObject = noneAbilityChanceObject
-		settingsSeed = encodeSeed([abilityDistributionType-1, basicEnemyBehaviorType-1, noneAbilityChanceBasicEnemy, noneAbilityChanceNonBasicEnemy, includeMiniBosses-1, includeMinnyAndWheelie-1, objectRandomizationType-1, noneAbilityChanceObject], [2,2,60,60,1,1,2,30])[0]
-		seedPluralString = " seed"
+		try:
+			assert 1 <= abilityDistributionType <= 3
+			assert 1 <= basicEnemyBehaviorType <= 3
+			assert 0 <= noneAbilityChanceBasicEnemy <= 60
+			assert 0 <= noneAbilityChanceNonBasicEnemy <= 60
+			assert 1 <= includeMiniBosses <= 2
+			assert 1 <= includeMinnyAndWheelie <= 2
+			assert 1 <= objectRandomizationType <= 3
+			assert 0 <= noneAbilityChanceObject <= 30
+			settingsSeed = encodeSeed([abilityDistributionType-1, basicEnemyBehaviorType-1, noneAbilityChanceBasicEnemy, noneAbilityChanceNonBasicEnemy, includeMiniBosses-1, includeMinnyAndWheelie-1, objectRandomizationType-1, noneAbilityChanceObject], [2,2,60,60,1,1,2,30])[0]
+			seedPluralString = " seed"
+		except:
+			return [False, "Invalid settings."]
+		try:
+			numSeeds = int(AMR_support.numSeeds.get())
+			1 <= numSeeds <= 20
+		except:
+			return [False, "Please select a value between 1 and 20 for # of seeds."]
 		for i in range(numSeeds):
 			maxVal = int("ZZZZZ", 36)
 			genSeed = random.randint(0, maxVal)
 			currSeed = (settingsSeed*(maxVal+1)) + genSeed
 			if not generateSeed(currSeed):
-				if seedNum > 1:
-					seedPluralString = " seeds"
 				if seedNum > 0:
+					seedPluralString = " seeds"
 					return [False, "Successfully generated "+str(seedNum)+seedPluralString+", but then something went wrong."]
 				else:
 					return [False, "Failed to generate"+seedPluralString+"."]
@@ -266,6 +282,7 @@ def randomize():
 			seedPluralString = " seeds"
 		return [True, "Successfully generated "+str(numSeeds)+seedPluralString+"."]
 
+# unused
 def main_cmd_line():
 	global sourceRom
 	global seedNum
@@ -588,7 +605,8 @@ def decodeSeed(seed, maxValueArray, seedBase=10):
 		baseShift += bitLength
 	return varArray
 
-def verifySeed(): # only used in main_cmd_line (which is unused)
+# only used in main_cmd_line (which is unused)
+def verifySeed():
 	global abilityDistributionType
 	global basicEnemyBehaviorType
 	global noneAbilityChanceBasicEnemy
@@ -633,7 +651,7 @@ def verifySeed(): # only used in main_cmd_line (which is unused)
 #
 # GUI module generated by PAGE version 5.4
 #  in conjunction with Tcl version 8.6
-#    Jul 06, 2020 09:09:34 PM EDT  platform: Windows NT
+#    Jul 07, 2020 04:04:29 PM EDT  platform: Windows NT
 
 import sys
 
@@ -696,7 +714,7 @@ class TopLevel:
         self.style.map('.',background=
             [('selected', _compcolor), ('active',_ana2color)])
 
-        top.geometry("600x450+1611+141")
+        top.geometry("600x450")
         top.minsize(120, 1)
         top.maxsize(2564, 1421)
         top.resizable(1, 1)
@@ -706,7 +724,7 @@ class TopLevel:
         top.configure(highlightcolor="black")
 
         self.Label_RomInput = ttk.Label(top)
-        self.Label_RomInput.place(relx=0.033, rely=0.044, height=19, width=215)
+        self.Label_RomInput.place(x=20, y=20,  height=19, width=215)
         self.Label_RomInput.configure(background="#d9d9d9")
         self.Label_RomInput.configure(foreground="#000000")
         self.Label_RomInput.configure(font="TkDefaultFont")
@@ -716,14 +734,13 @@ class TopLevel:
         self.Label_RomInput.configure(text='''Kirby & The Amazing Mirror (USA) ROM''')
 
         self.Button_RomInput = ttk.Button(top)
-        self.Button_RomInput.place(relx=0.833, rely=0.04, height=25, width=76)
+        self.Button_RomInput.place(x=500, y=18,  height=25, width=76)
         self.Button_RomInput.configure(command=AMR_support.setSourceRom)
         self.Button_RomInput.configure(takefocus="")
         self.Button_RomInput.configure(text='''Select ROM''')
 
         self.Entry_RomInput = ttk.Entry(top)
-        self.Entry_RomInput.place(relx=0.4, rely=0.044, relheight=0.047
-                , relwidth=0.417)
+        self.Entry_RomInput.place(x=240, y=20, height=21, width=250)
         self.Entry_RomInput.configure(state='readonly')
         self.Entry_RomInput.configure(textvariable=AMR_support.sourceRom)
         self.Entry_RomInput.configure(background="#000000")
@@ -733,15 +750,13 @@ class TopLevel:
         top.configure(menu = self.menubar)
 
         self.TFrame1 = ttk.Frame(top)
-        self.TFrame1.place(relx=0.033, rely=0.178, relheight=0.556
-                , relwidth=0.933)
+        self.TFrame1.place(x=20, y=80, height=250, width=560)
         self.TFrame1.configure(relief='groove')
         self.TFrame1.configure(borderwidth="2")
         self.TFrame1.configure(relief="groove")
 
         self.Label_AbilityDistribution = tk.Label(self.TFrame1)
-        self.Label_AbilityDistribution.place(relx=0.036, rely=0.1, height=21
-                , width=105)
+        self.Label_AbilityDistribution.place(x=20, y=25,  height=21, width=105)
         self.Label_AbilityDistribution.configure(activebackground="#f9f9f9")
         self.Label_AbilityDistribution.configure(activeforeground="black")
         self.Label_AbilityDistribution.configure(anchor='w')
@@ -753,8 +768,8 @@ class TopLevel:
         self.Label_AbilityDistribution.configure(text='''Ability Distribution''')
 
         self.Label_EnemiesWithoutAbility = tk.Label(self.TFrame1)
-        self.Label_EnemiesWithoutAbility.place(relx=0.357, rely=0.1, height=21
-                , width=151)
+        self.Label_EnemiesWithoutAbility.place(x=200, y=25, height=21, width=151)
+
         self.Label_EnemiesWithoutAbility.configure(activebackground="#f9f9f9")
         self.Label_EnemiesWithoutAbility.configure(activeforeground="black")
         self.Label_EnemiesWithoutAbility.configure(anchor='w')
@@ -766,8 +781,7 @@ class TopLevel:
         self.Label_EnemiesWithoutAbility.configure(text='''Enemies Without An Ability''')
 
         self.Label_UndecidedEnemyChance = tk.Label(self.TFrame1)
-        self.Label_UndecidedEnemyChance.place(relx=0.643, rely=0.048, height=31
-                , width=146)
+        self.Label_UndecidedEnemyChance.place(x=360, y=12, height=31, width=146)
         self.Label_UndecidedEnemyChance.configure(activebackground="#f9f9f9")
         self.Label_UndecidedEnemyChance.configure(activeforeground="black")
         self.Label_UndecidedEnemyChance.configure(background="#d9d9d9")
@@ -779,8 +793,8 @@ class TopLevel:
 from Undecided Enemies''')
 
         self.ComboBox_AbilityDistribution = ttk.Combobox(self.TFrame1)
-        self.ComboBox_AbilityDistribution.place(relx=0.036, rely=0.188
-                , relheight=0.084, relwidth=0.255)
+        self.ComboBox_AbilityDistribution.place(x=20, y=47, height=21, width=143)
+
         self.value_list = ['Pure Random','By Enemy Grouping','By Ability Frequency',]
         self.ComboBox_AbilityDistribution.configure(values=self.value_list)
         self.ComboBox_AbilityDistribution.configure(state='readonly')
@@ -788,16 +802,15 @@ from Undecided Enemies''')
         self.ComboBox_AbilityDistribution.configure(background="#000000")
 
         self.ComboBox_EnemiesWithoutAbility = ttk.Combobox(self.TFrame1)
-        self.ComboBox_EnemiesWithoutAbility.place(relx=0.357, rely=0.188
-                , relheight=0.084, relwidth=0.255)
+        self.ComboBox_EnemiesWithoutAbility.place(x=200, y=47, height=21
+                , width=143)
         self.value_list = ['All Random','Basic Enemies Random','No Random (Unchanged)',]
         self.ComboBox_EnemiesWithoutAbility.configure(values=self.value_list)
         self.ComboBox_EnemiesWithoutAbility.configure(state='readonly')
         self.ComboBox_EnemiesWithoutAbility.configure(textvariable=AMR_support.basicEnemyBehaviorType)
 
         self.Entry_UndecidedEnemyChance = ttk.Entry(self.TFrame1)
-        self.Entry_UndecidedEnemyChance.place(relx=0.714, rely=0.188
-                , relheight=0.084, relwidth=0.064)
+        self.Entry_UndecidedEnemyChance.place(x=400, y=47, height=21, width=36)
         self.Entry_UndecidedEnemyChance.configure(textvariable=AMR_support.noneAbilityChanceEnemy)
         self.Entry_UndecidedEnemyChance.configure(takefocus="")
         self.Entry_UndecidedEnemyChance.configure(cursor="ibeam")
@@ -805,7 +818,7 @@ from Undecided Enemies''')
         self.Entry_UndecidedEnemyChance.bind('<KeyRelease>',AMR_support.keepNumsEnemies)
 
         self.Label_Percent1 = ttk.Label(self.TFrame1)
-        self.Label_Percent1.place(relx=0.786, rely=0.188, height=21, width=14)
+        self.Label_Percent1.place(x=440, y=47,  height=21, width=14)
         self.Label_Percent1.configure(background="#d9d9d9")
         self.Label_Percent1.configure(foreground="#000000")
         self.Label_Percent1.configure(font="TkDefaultFont")
@@ -817,24 +830,23 @@ from Undecided Enemies''')
         self.style.map('TCheckbutton',background=
             [('selected', _bgcolor), ('active', _ana2color)])
         self.CheckButton_RandomizeMiniBosses = ttk.Checkbutton(self.TFrame1)
-        self.CheckButton_RandomizeMiniBosses.place(relx=0.036, rely=0.38
-                ,relwidth=0.268, relheight=0.0, height=21)
+        self.CheckButton_RandomizeMiniBosses.place(x=20, y=95, width=150
+                , height=21)
         self.CheckButton_RandomizeMiniBosses.configure(variable=AMR_support.includeMiniBosses)
         self.CheckButton_RandomizeMiniBosses.configure(offvalue="2")
         self.CheckButton_RandomizeMiniBosses.configure(takefocus="")
         self.CheckButton_RandomizeMiniBosses.configure(text='''Randomize Mini-Bosses''')
 
         self.CheckButton_RandomizeMinnyAndWheelie = ttk.Checkbutton(self.TFrame1)
-        self.CheckButton_RandomizeMinnyAndWheelie.place(relx=0.357, rely=0.38
-                ,relwidth=0.352, relheight=0.0, height=21)
+        self.CheckButton_RandomizeMinnyAndWheelie.place(x=200, y=95, width=197
+                , height=21)
         self.CheckButton_RandomizeMinnyAndWheelie.configure(variable=AMR_support.includeMinnyAndWheelie)
         self.CheckButton_RandomizeMinnyAndWheelie.configure(offvalue="2")
         self.CheckButton_RandomizeMinnyAndWheelie.configure(takefocus="")
         self.CheckButton_RandomizeMinnyAndWheelie.configure(text='''Randomize Minny and Wheelie''')
 
         self.Label_RandomizeObjects = ttk.Label(self.TFrame1)
-        self.Label_RandomizeObjects.place(relx=0.036, rely=0.592, height=21
-                , width=106)
+        self.Label_RandomizeObjects.place(x=20, y=148,  height=21, width=106)
         self.Label_RandomizeObjects.configure(background="#d9d9d9")
         self.Label_RandomizeObjects.configure(foreground="#000000")
         self.Label_RandomizeObjects.configure(font="TkDefaultFont")
@@ -844,15 +856,14 @@ from Undecided Enemies''')
         self.Label_RandomizeObjects.configure(text='''Randomize Objects''')
 
         self.ComboBox_RandomizeObjects = ttk.Combobox(self.TFrame1)
-        self.ComboBox_RandomizeObjects.place(relx=0.036, rely=0.68
-                , relheight=0.084, relwidth=0.255)
+        self.ComboBox_RandomizeObjects.place(x=20, y=170, height=21, width=143)
         self.value_list = ['Yes','Basic Objects Only','No',]
         self.ComboBox_RandomizeObjects.configure(values=self.value_list)
         self.ComboBox_RandomizeObjects.configure(state='readonly')
         self.ComboBox_RandomizeObjects.configure(textvariable=AMR_support.objectRandomizationType)
 
         self.Label_UndecidedObjectChance = tk.Label(self.TFrame1)
-        self.Label_UndecidedObjectChance.place(relx=0.357, rely=0.54, height=31
+        self.Label_UndecidedObjectChance.place(x=200, y=135, height=31
                 , width=146)
         self.Label_UndecidedObjectChance.configure(activebackground="#f9f9f9")
         self.Label_UndecidedObjectChance.configure(activeforeground="black")
@@ -865,8 +876,8 @@ from Undecided Enemies''')
 from Undecided Objects''')
 
         self.Entry_UndecidedObjectChance = ttk.Entry(self.TFrame1)
-        self.Entry_UndecidedObjectChance.place(relx=0.429, rely=0.68
-                , relheight=0.084, relwidth=0.064)
+        self.Entry_UndecidedObjectChance.place(x=240, y=170, height=21, width=36)
+
         self.Entry_UndecidedObjectChance.configure(textvariable=AMR_support.noneAbilityChanceObject)
         self.Entry_UndecidedObjectChance.configure(takefocus="")
         self.Entry_UndecidedObjectChance.configure(cursor="ibeam")
@@ -874,7 +885,7 @@ from Undecided Objects''')
         self.Entry_UndecidedObjectChance.bind('<KeyRelease>',AMR_support.keepNumsObjects)
 
         self.Label_Percent2 = ttk.Label(self.TFrame1)
-        self.Label_Percent2.place(relx=0.5, rely=0.68, height=21, width=16)
+        self.Label_Percent2.place(x=280, y=170,  height=21, width=16)
         self.Label_Percent2.configure(background="#d9d9d9")
         self.Label_Percent2.configure(foreground="#000000")
         self.Label_Percent2.configure(font="TkDefaultFont")
@@ -884,7 +895,7 @@ from Undecided Objects''')
         self.Label_Percent2.configure(text='''%''')
 
         self.Label_NumSeeds = ttk.Label(self.TFrame1)
-        self.Label_NumSeeds.place(relx=0.714, rely=0.592, height=21, width=58)
+        self.Label_NumSeeds.place(x=400, y=148,  height=21, width=58)
         self.Label_NumSeeds.configure(background="#d9d9d9")
         self.Label_NumSeeds.configure(foreground="#000000")
         self.Label_NumSeeds.configure(font="TkDefaultFont")
@@ -894,8 +905,7 @@ from Undecided Objects''')
         self.Label_NumSeeds.configure(text='''# of Seeds''')
 
         self.ComboBox_NumSeeds = ttk.Combobox(self.TFrame1)
-        self.ComboBox_NumSeeds.place(relx=0.714, rely=0.68, relheight=0.084
-                , relwidth=0.095)
+        self.ComboBox_NumSeeds.place(x=400, y=170, height=21, width=53)
         self.value_list = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',]
         self.ComboBox_NumSeeds.configure(values=self.value_list)
         self.ComboBox_NumSeeds.configure(state='readonly')
@@ -904,22 +914,19 @@ from Undecided Objects''')
         self.style.map('TRadiobutton',background=
             [('selected', _bgcolor), ('active', _ana2color)])
         self.RadioButton_UseSettings = ttk.Radiobutton(top)
-        self.RadioButton_UseSettings.place(relx=0.033, rely=0.111, relwidth=0.148
-                , relheight=0.0, height=21)
+        self.RadioButton_UseSettings.place(x=20, y=50, width=89, height=21)
         self.RadioButton_UseSettings.configure(variable=AMR_support.useSeed)
         self.RadioButton_UseSettings.configure(value="2")
         self.RadioButton_UseSettings.configure(text='''Use Settings''')
         self.RadioButton_UseSettings.configure(compound='none')
 
         self.RadioButton_UseSeed = ttk.Radiobutton(top)
-        self.RadioButton_UseSeed.place(relx=0.467, rely=0.111, relwidth=0.132
-                , relheight=0.0, height=21)
+        self.RadioButton_UseSeed.place(x=280, y=50, width=79, height=21)
         self.RadioButton_UseSeed.configure(variable=AMR_support.useSeed)
         self.RadioButton_UseSeed.configure(text='''Use Seed''')
 
         self.Entry_SeedInput = ttk.Entry(top)
-        self.Entry_SeedInput.place(relx=0.6, rely=0.111, relheight=0.047
-                , relwidth=0.217)
+        self.Entry_SeedInput.place(x=360, y=50, height=21, width=130)
         self.Entry_SeedInput.configure(state='disabled')
         self.Entry_SeedInput.configure(textvariable=AMR_support.seedInput)
         self.Entry_SeedInput.configure(takefocus="")
@@ -928,21 +935,21 @@ from Undecided Objects''')
         self.Entry_SeedInput.bind('<KeyRelease>',AMR_support.keepUpperCharsSeed)
 
         self.CheckButton_GenerateTextLog = ttk.Checkbutton(top)
-        self.CheckButton_GenerateTextLog.place(relx=0.25, rely=0.889
-                ,relwidth=0.197, relheight=0.0, height=21)
+        self.CheckButton_GenerateTextLog.place(x=150, y=400, width=118
+                , height=21)
         self.CheckButton_GenerateTextLog.configure(variable=AMR_support.generateAbilityLog)
         self.CheckButton_GenerateTextLog.configure(takefocus="")
         self.CheckButton_GenerateTextLog.configure(text='''Generate Text Log''')
 
         self.Button_CreateRom = ttk.Button(top)
-        self.Button_CreateRom.place(relx=0.55, rely=0.889, height=25, width=76)
+        self.Button_CreateRom.place(x=330, y=400,  height=25, width=76)
         self.Button_CreateRom.configure(takefocus="")
         self.Button_CreateRom.configure(text='''Randomize!''')
 
         self.Label_Message = ttk.Label(top)
-        self.Label_Message.place(relx=0.05, rely=0.778, height=30, width=545)
+        self.Label_Message.place(x=30, y=350,  height=30, width=545)
         self.Label_Message.configure(background="#d9d9d9")
-        self.Label_Message.configure(foreground="#0000ff")
+        self.Label_Message.configure(foreground="#000000")
         self.Label_Message.configure(font="TkDefaultFont")
         self.Label_Message.configure(relief="flat")
         self.Label_Message.configure(anchor='center')
@@ -952,8 +959,11 @@ from Undecided Objects''')
         self.RadioButton_UseSettings.configure(command=self.prepareSettingsAndSeed)
         self.RadioButton_UseSeed.configure(command=self.prepareSettingsAndSeed)
         self.Button_CreateRom.configure(command=self.attemptRandomize)
+        self.ComboBox_AbilityDistribution.bind('<<ComboboxSelected>>',self.changedAbilityDistributionType)
+        self.ComboBox_EnemiesWithoutAbility.bind('<<ComboboxSelected>>',self.changedBasicEnemyBehaviorType)
+        self.ComboBox_RandomizeObjects.bind('<<ComboboxSelected>>',self.changedObjectRandomizationType)
 
-    def prepareSettingsAndSeed(self):
+    def prepareSettingsAndSeed(self, unused=None):
         if AMR_support.useSeed.get()=="1":
             self.Entry_SeedInput.configure(state="normal")
             self.ComboBox_AbilityDistribution.configure(state="disabled")
@@ -967,13 +977,47 @@ from Undecided Objects''')
         else:
             self.Entry_SeedInput.configure(state="disabled")
             self.ComboBox_AbilityDistribution.configure(state="readonly")
-            self.ComboBox_EnemiesWithoutAbility.configure(state="readonly")
-            self.Entry_UndecidedEnemyChance.configure(state="normal")
+            if AMR_support.abilityDistributionType.get() != "Pure Random":
+                self.ComboBox_EnemiesWithoutAbility.configure(state="disabled")
+            else:
+                self.ComboBox_EnemiesWithoutAbility.configure(state="readonly")
+            if AMR_support.basicEnemyBehaviorType.get() in ["No Random (Unchanged)", "N/A"]:
+                self.Entry_UndecidedEnemyChance.configure(state="disabled")
+            else:
+                self.Entry_UndecidedEnemyChance.configure(state="normal")
             self.CheckButton_RandomizeMiniBosses.configure(state="normal")
             self.CheckButton_RandomizeMinnyAndWheelie.configure(state="normal")
             self.ComboBox_RandomizeObjects.configure(state="readonly")
-            self.Entry_UndecidedObjectChance.configure(state="normal")
+            if AMR_support.objectRandomizationType.get() != "Yes":
+                self.Entry_UndecidedObjectChance.configure(state="disabled")
+            else:
+                self.Entry_UndecidedObjectChance.configure(state="normal")
             self.ComboBox_NumSeeds.configure(state="readonly")
+
+    def changedAbilityDistributionType(self, unused=None):
+        if AMR_support.abilityDistributionType.get() != "Pure Random":
+            AMR_support.basicEnemyBehaviorType.set("N/A")
+        else:
+            AMR_support.basicEnemyBehaviorType.set("All Random")
+        if AMR_support.basicEnemyBehaviorType.get() in ["No Random (Unchanged)", "N/A"]:
+            AMR_support.noneAbilityChanceEnemy.set("N/A")
+        else:
+            AMR_support.noneAbilityChanceEnemy.set("90")
+        self.prepareSettingsAndSeed()
+
+    def changedBasicEnemyBehaviorType(self, unused=None):
+        if AMR_support.basicEnemyBehaviorType.get() in ["No Random (Unchanged)", "N/A"]:
+            AMR_support.noneAbilityChanceEnemy.set("N/A")
+        else:
+            AMR_support.noneAbilityChanceEnemy.set("90")
+        self.prepareSettingsAndSeed()
+
+    def changedObjectRandomizationType(self, unused=None):
+        if AMR_support.objectRandomizationType.get() != "Yes":
+            AMR_support.noneAbilityChanceObject.set("N/A")
+        else:
+            AMR_support.noneAbilityChanceObject.set("90")
+        self.prepareSettingsAndSeed()
 
     def attemptRandomize(self):
         results = randomize()

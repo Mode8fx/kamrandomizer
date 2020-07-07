@@ -11,11 +11,11 @@ def initVars():
     numSeeds.set("1")
     useSeed.set("2")
     generateAbilityLog.set("1")
+    message.set("Welcome to the Amazing Mirror Randomizer! Move your mouse over a label to learn more about it.")
 
 def setSourceRom():
     global sourceRom
     sourceRom.set(tk.filedialog.askopenfilename(filetypes=[("GBA ROM files", "*.gba")]))
-    sys.stdout.flush()
 
 def keepUpperCharsSeed(unused):
     global seedInput
@@ -25,10 +25,20 @@ def keepUpperCharsSeed(unused):
 def keepNumsEnemies(unused):
     global noneAbilityChanceEnemy
     noneAbilityChanceEnemy.set(''.join(ch for ch in noneAbilityChanceEnemy.get() if ch.isdigit()))
+    temp = noneAbilityChanceEnemy.get()
+    if len(temp) >= 3 and temp[:3] == "100":
+        noneAbilityChanceEnemy.set("100")
+    else:
+        noneAbilityChanceEnemy.set(temp[:2])
 
 def keepNumsObjects(unused):
     global noneAbilityChanceObject
     noneAbilityChanceObject.set(''.join(ch for ch in noneAbilityChanceObject.get() if ch.isdigit()))
+    temp = noneAbilityChanceObject.get()
+    if len(temp) >= 3 and temp[:3] == "100":
+        noneAbilityChanceObject.set("100")
+    else:
+        noneAbilityChanceObject.set(temp[:2])
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
