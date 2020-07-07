@@ -1,5 +1,6 @@
         self.RadioButton_UseSettings.configure(command=self.prepareSettingsAndSeed)
         self.RadioButton_UseSeed.configure(command=self.prepareSettingsAndSeed)
+        self.Button_CreateRom.configure(command=self.attemptRandomize)
 
     def prepareSettingsAndSeed(self):
         if AMR_support.useSeed.get()=="1":
@@ -22,3 +23,8 @@
             self.ComboBox_RandomizeObjects.configure(state="readonly")
             self.Entry_UndecidedObjectChance.configure(state="normal")
             self.ComboBox_NumSeeds.configure(state="readonly")
+
+    def attemptRandomize(self):
+        results = randomize()
+        AMR_support.message.set(results[1])
+        self.Label_Message.configure(foreground="#0000FF" if results[0] else "#FF0000")

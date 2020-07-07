@@ -20,6 +20,7 @@ def setSourceRom():
 def keepUpperCharsSeed(unused):
     global seedInput
     seedInput.set(''.join(ch.upper() for ch in seedInput.get() if ch.isalpha() or ch.isdigit()))
+    seedInput.set(seedInput.get()[:10])
 
 def keepNumsEnemies(unused):
     global noneAbilityChanceEnemy
