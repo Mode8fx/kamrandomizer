@@ -2,6 +2,7 @@ IMPORTANT ADDRESSES/VALUES:
 
 Enemy ability adresses, ability values, other assorted addresses, and a searchable area of the ROM that contains enemy data can be found at the following Google Sheet:
 https://docs.google.com/spreadsheets/d/1h7sBy7uLChk8k_WqlUQqKBzgmuiIzT5hbgjtfvkmhug/edit?usp=sharing
+You'll have to make a copy for your own drive first (File -> Make a copy) if you want to set the filter in the data table, otherwise it'll be read-only.
 
 
 
