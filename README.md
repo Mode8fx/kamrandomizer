@@ -1,6 +1,8 @@
 # Amazing Mirror Randomizer
 This is a randomizer for Kirby & The Amazing Mirror that changes the abilities you can obtain from each enemy. You will need a US ROM of Kirby & The Amazing Mirror to use this.
 
+![](https://github.com/GateGuy/kamrandomizer/blob/master/Screenshot.png?raw=true)
+
 ## Features
 There are plenty of user options that can adjust how abilities are distributed. These are all explained in detail in the program, but some of them include:
 - Group by original enemy grouping or original ability frequency
