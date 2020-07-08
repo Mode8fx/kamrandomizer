@@ -1,8 +1,9 @@
+import sys
 import random
 import shutil
 import copy
 from math import ceil, floor
-from os import path, remove
+from os import path, remove, mkdir
 from time import sleep
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
@@ -13,6 +14,7 @@ if getattr(sys, 'frozen', False):
 else:
 	mainFolder = path.dirname(path.realpath(__file__)) # PY (source) file
 sys.path.append(mainFolder)
+outputFolder = path.join(mainFolder, "output")
 
 """
 Ability Values:
@@ -182,7 +184,7 @@ def main():
 
 def randomize():
 	global sourceRom
-	global seedNum
+	global numSeedsFinished
 	global currSeed
 	global abilityDistributionType
 	global basicEnemyBehaviorType
@@ -201,7 +203,7 @@ def randomize():
 	except:
 		return [False, "Invalid ROM input."]
 	generateAbilityLog = int(AMR_support.generateAbilityLog.get())
-	seedNum = 1
+	numSeedsFinished = 0
 	if int(AMR_support.useSeed.get()) == 1:
 		try:
 			assert(len(AMR_support.seedInput.get()) == 10)
@@ -280,19 +282,20 @@ def randomize():
 			genSeed = random.randint(0, maxVal)
 			currSeed = (settingsSeed*(maxVal+1)) + genSeed
 			if not generateSeed(currSeed):
-				if seedNum > 0:
+				if numSeedsFinished > 1:
 					seedPluralString = " seeds"
-					return [False, "Successfully generated "+str(seedNum)+seedPluralString+", but then something went wrong."]
+				if numSeeds > 0:
+					return [False, "Successfully generated "+str(numSeedsFinished)+seedPluralString+", but then something went wrong."]
 				else:
 					return [False, "Failed to generate"+seedPluralString+"."]
-		if seedNum > 1:
+		if numSeedsFinished > 1:
 			seedPluralString = " seeds"
 		return [True, "Successfully generated "+str(numSeeds)+seedPluralString+"."]
 
 # unused
 def main_cmd_line():
 	global sourceRom
-	global seedNum
+	global numSeedsFinished
 	global currSeed
 	global abilityDistributionType
 	global basicEnemyBehaviorType
@@ -315,7 +318,7 @@ def main_cmd_line():
 		sourceRom = askopenfilename(filetypes=[("GBA ROM files", "*.gba")])
 	useSeed = makeChoice("Do you already have a seed?", ["Yes", "No"])
 	seedInput = ""
-	seedNum = 1
+	numSeedsFinished = 1
 	if useSeed == 1:
 		currSeed = verifySeed()
 		generateAbilityLog = makeChoice("Generate a spoiler text file containing ability distribution?", [
@@ -384,7 +387,7 @@ def generateSeed(seed):
 	global myEnemies
 	global myObjects
 	global currSeed
-	global seedNum
+	global numSeedsFinished
 	global seedString
 	global abilityDistributionType
 	global basicEnemyBehaviorType
@@ -398,7 +401,7 @@ def generateSeed(seed):
 	global generateAbilityLog
 
 	seedString = str(dec_to_base(currSeed, 36)).upper().zfill(10)
-	print("\nGenerating ROM #"+str(seedNum)+" with seed "+seedString+".")
+	print("\nGenerating ROM #"+str(numSeedsFinished+1)+" with seed "+seedString+".")
 	random.seed(currSeed)
 
 	myEnemies = copy.deepcopy(normalEnemies)
@@ -425,11 +428,13 @@ def generateSeed(seed):
 		abilityArray = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19]
 		myObjects = randomizeGroup(myObjects, abilityArray, True, False)
 
+	if not path.isdir(outputFolder):
+		mkdir(outputFolder)
 	if not generateRom():
 		return False
 	if generateAbilityLog:
 		generateLog()
-	seedNum += 1
+	numSeedsFinished += 1
 	return True
 
 def shuffleDict(oldDict):
@@ -486,7 +491,7 @@ def generateRom():
 	global currSeed
 	global seedString
 
-	newRom = path.join(mainFolder, path.splitext(path.basename(sourceRom))[0]+"-"+seedString+".gba")
+	newRom = path.join(outputFolder, path.splitext(path.basename(sourceRom))[0]+"-"+seedString+".gba")
 	shutil.copyfile(sourceRom, newRom)
 	try:
 		file = open(newRom, "r+b")
@@ -514,7 +519,7 @@ def generateLog():
 	global myObjects
 	global abilities
 
-	newLog = path.join(mainFolder, path.splitext(path.basename(sourceRom))[0]+"-"+seedString+".txt")
+	newLog = path.join(outputFolder, path.splitext(path.basename(sourceRom))[0]+"-"+seedString+".txt")
 	file = open(newLog, "w")
 	file.writelines("NORMAL ENEMIES:\n")
 	for key in normalEnemies:
