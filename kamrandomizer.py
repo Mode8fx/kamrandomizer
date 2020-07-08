@@ -536,7 +536,7 @@ def generateLog():
 		else:
 			file.writelines(key+" - "+abilities[miniBosses[key][1]]+" [unchanged]"+"\n")
 	file.writelines("\nOBJECTS:\n")
-	for key in myObjects:
+	for key in objects:
 		if key in myObjects:
 			unchangedStr = " [unchanged]" if myObjects[key][1] == objects[key][1] else ""
 			file.writelines(key+" - "+abilities[myObjects[key][1]]+unchangedStr+"\n")
