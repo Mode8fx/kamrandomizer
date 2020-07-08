@@ -7,6 +7,13 @@ from time import sleep
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 
+# the same folder where this program is stored
+if getattr(sys, 'frozen', False):
+    mainFolder = path.dirname(sys.executable) # EXE (executable) file
+else:
+	mainFolder = path.dirname(path.realpath(__file__)) # PY (source) file
+sys.path.append(mainFolder)
+
 """
 Ability Values:
 
@@ -479,7 +486,7 @@ def generateRom():
 	global currSeed
 	global seedString
 
-	newRom = path.splitext(sourceRom)[0]+"-"+seedString+".gba"
+	newRom = path.join(mainFolder, path.splitext(path.basename(sourceRom))[0]+"-"+seedString+".gba")
 	shutil.copyfile(sourceRom, newRom)
 	try:
 		file = open(newRom, "r+b")
@@ -507,7 +514,7 @@ def generateLog():
 	global myObjects
 	global abilities
 
-	newLog = path.splitext(sourceRom)[0]+"-"+seedString+".txt"
+	newLog = path.join(mainFolder, path.splitext(path.basename(sourceRom))[0]+"-"+seedString+".txt")
 	file = open(newLog, "w")
 	file.writelines("NORMAL ENEMIES:\n")
 	for key in normalEnemies:
@@ -945,8 +952,7 @@ from Undecided Objects''')
         self.Label_UndecidedObjectChance_tooltip = \
         ToolTip(self.Label_UndecidedObjectChance, self.tooltip_font, '''What is the % chance that a randomized object will give an ability?
 100% - Always
-0% - Never
-''')
+0% - Never''')
 
         self.style.map('TRadiobutton',background=
             [('selected', _bgcolor), ('active', _ana2color)])
