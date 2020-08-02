@@ -9,9 +9,14 @@ import sys
 
 try:
     import Tkinter as tk
+    from Tkinter.filedialog import askopenfilename
+    from Tkinter import font as tkFont
+    from Tkinter.messagebox import showinfo, showerror
 except ImportError:
     import tkinter as tk
-
+    from tkinter.filedialog import askopenfilename
+    from tkinter import font as tkFont
+    from tkinter.messagebox import showinfo, showerror
 try:
     import ttk
     py3 = False
