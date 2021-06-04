@@ -771,7 +771,7 @@ class TopLevel:
 		xOffset = -.06
 
 		# Rom Input Label
-		Rom_Name = "Kirby & The Amazing Mirror ROM"
+		Rom_Name = "Kirby & The Amazing Mirror (USA) ROM"
 		self.Label_RomInput = ttk.Label(top)
 		romTextLength = self.getTextLength(Rom_Name)
 		self.Label_RomInput.place(relx=.035, rely=.04*vMult, relheight=.05*vMult, relwidth=romTextLength)
@@ -1139,7 +1139,7 @@ from Undecided Objects''')
 			\nGenerated ROMs will be placed in an \"output\" folder, which will be in the same folder as this program.")
 
 	def showAboutPopup(self):
-		showinfo("About", "Kirby & The Amazing Mirror Randomizer v0.91\nMade by GateGuy\n\nhttps://github.com/GateGuy/kamrandomizer")
+		showinfo("About", "Kirby & The Amazing Mirror Randomizer v0.92\nMade by GateGuy\n\nhttps://github.com/GateGuy/kamrandomizer")
 
 # ======================================================
 # Support code for Balloon Help (also called tooltips).

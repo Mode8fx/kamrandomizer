@@ -6,6 +6,7 @@
 #    Jul 06, 2020 08:24:00 PM EDT  platform: Windows NT
 
 import sys
+import binascii
 
 try:
     import Tkinter as tk
@@ -70,6 +71,13 @@ def initVars():
 def setSourceRom():
     global sourceRom
     sourceRom.set(tk.filedialog.askopenfilename(filetypes=[("GBA ROM files", "*.gba")]))
+    with open(sourceRom.get(), "rb") as inputFile:
+        fileBytes = inputFile.read()
+    currHash = "9F2A3048"
+    fileHash = str(hex(binascii.crc32(fileBytes)))[2:].zfill(8).upper()
+    if currHash != fileHash:
+        showerror("Incorrect File", "Incorrect file; CRC32 does not match expected hash.\n\nExpected: "+currHash+"\nGot: "+fileHash)
+        sourceRom.set("")
 
 def keepUpperCharsSeed(unused):
     global seedInput
